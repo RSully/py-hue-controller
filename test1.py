@@ -58,7 +58,8 @@ for light in lights:
 	original[light.light_id] = {
 		'hue': light._get('hue'),
 		'sat': light._get('sat'),
-		'bri': light._get('bri')
+		'bri': light._get('bri'),
+		'on': light._get('on')
 	}
 
 
