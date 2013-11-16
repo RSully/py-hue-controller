@@ -10,6 +10,7 @@ import urllib2
 import sys
 
 def get_ip():
+	# hacky one liner
 	return json.loads(urllib2.urlopen("http://www.meethue.com/api/nupnp").read())[0]['internalipaddress']
 
 # just get the first bridge we can find
@@ -50,14 +51,31 @@ def light_fun(br, light):
 		res = br.set_light(light.light_id, command)
 		time.sleep((trans / 1000.0) * 1.05)
 
+
+print 'Caching original light states'
+original = {}
 for light in lights:
-	print 'Setting up thread for light'
-	print vars(light)
+	original[light.light_id] = {
+		'hue': light._get('hue'),
+		'sat': light._get('sat'),
+		'bri': light._get('bri')
+	}
+
+
+print 'Starting threads'
+for light in lights:
+	print 'Setting up thread for light %s (%d)' % (light.name, light.light_id)
 
 	thread = threading.Thread(target=light_fun, args = (br,light))
 	thread.daemon = True
 	thread.start()
 
 
-while True:
-	pass
+# Wait until exit
+try:
+	while True:
+		pass
+except (KeyboardInterrupt, SystemExit):
+	print 'Resetting lights to original HSB'
+	for orig in original:
+		br.set_light(orig, original[orig])
