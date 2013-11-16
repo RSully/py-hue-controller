@@ -5,8 +5,15 @@ import threading
 import random
 import time
 import datetime
+import json
+import urllib2
+import sys
 
-br = Bridge('192.168.11.7')
+def get_ip():
+	return json.loads(urllib2.urlopen("http://www.meethue.com/api/nupnp").read())[0]['internalipaddress']
+
+# just get the first bridge we can find
+br = Bridge(get_ip())
 
 print 'Connected to bridge:'
 print vars(br)
@@ -41,14 +48,12 @@ def light_fun(br, light):
 		)
 
 		res = br.set_light(light.light_id, command)
-		# print res
 		time.sleep((trans / 1000.0) * 1.05)
 
 for light in lights:
 	print 'Setting up thread for light'
 	print vars(light)
 
-	# light_fun(br, light)
 	thread = threading.Thread(target=light_fun, args = (br,light))
 	thread.daemon = True
 	thread.start()
